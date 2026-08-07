@@ -5,6 +5,9 @@ on:
     - cron: "0 11 * * *"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -37,6 +40,7 @@ jobs:
         env:
           BASE_URL: "https://drewblair61-dev.github.io/front-range-files"
           FORM_ACTION: "#"
+          GOOGLE_VERIFY: "bfBKVN94B7V6HhkFNaZDCCRhUETU0dAkHmnrb_7PbKA"
         run: python build_pages.py
 
       - name: Publish pages
