@@ -39,8 +39,9 @@ jobs:
       - name: Build pages
         env:
           BASE_URL: "https://drewblair61-dev.github.io/front-range-files"
-          FORM_ACTION: "#"
+          FORM_ACTION: "PASTE_YOUR_FORMSPREE_URL_HERE"
           GOOGLE_VERIFY: "bfBKVN94B7V6HhkFNaZDCCRhUETU0dAkHmnrb_7PbKA"
+          CONTACT_EMAIL: "PASTE_YOUR_EMAIL_HERE"
         run: python build_pages.py
 
       - name: Publish pages
@@ -53,7 +54,3 @@ jobs:
 
       - name: Upload digests
         uses: actions/upload-artifact@v4
-        with:
-          name: digests
-          path: out/
-          retention-days: 14
