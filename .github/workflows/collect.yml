@@ -54,3 +54,7 @@ jobs:
 
       - name: Upload digests
         uses: actions/upload-artifact@v4
+        with:
+          name: digests
+          path: out/
+          retention-days: 14
