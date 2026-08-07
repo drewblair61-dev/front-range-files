@@ -27,7 +27,7 @@ jobs:
       - name: Collect
         env:
           SOCRATA_APP_TOKEN: ${{ secrets.SOCRATA_APP_TOKEN }}
-          LOOKBACK_DAYS: "7"
+          LOOKBACK_DAYS: "30"
         run: python collect.py
 
       - name: Build digests
