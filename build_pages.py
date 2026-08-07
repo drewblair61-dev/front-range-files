@@ -26,6 +26,7 @@ SITE = os.environ.get("SITE_NAME", "Front Range Filings")
 BASE = os.environ.get("BASE_URL", "")          # e.g. https://yourdomain.com
 FORM = os.environ.get("FORM_ACTION", "#")      # your email form endpoint
 GSV = os.environ.get("GOOGLE_VERIFY", "")      # Search Console verification code
+CONTACT = os.environ.get("CONTACT_EMAIL", "")  # shown on privacy/terms pages
 WINDOW_DAYS = 30
 MIN_ROWS = 8          # below this, no page
 PREVIEW_ROWS = 10     # shown in full before the gate
@@ -178,6 +179,8 @@ def page(title, desc, h1, lede, stats, rows, hidden, county, category,
   Business registration data is public record published by the State of
   Colorado. Any outreach you do using it remains subject to CAN-SPAM, the
   TCPA, and Colorado telemarketing rules.
+  <p><a href="{BASE}/privacy.html">Privacy</a> &nbsp;·&nbsp;
+     <a href="{BASE}/terms.html">Terms</a></p>
 </div></footer>
 </body></html>"""
 
@@ -306,6 +309,145 @@ from official state records.">
         fh.write(home)
     urls.insert(0, "")
     print("wrote index.html")
+
+    # Privacy and terms. Generated automatically so they stay in sync with
+    # the site and can never be forgotten before the email form goes live.
+    legal_css = CSS + """
+.legal h2{font-size:20px;margin:32px 0 8px}
+.legal p,.legal li{color:var(--soft);max-width:64ch}
+.legal ul{padding-left:20px}
+"""
+    updated = datetime.now(timezone.utc).strftime("%d %B %Y")
+    mail = (f'<a href="mailto:{CONTACT}">{esc(CONTACT)}</a>'
+            if CONTACT else "the contact address on this site")
+
+    def legal_page(title, body):
+        return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{esc(title)} — {esc(SITE)}</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>{legal_css}</style>
+</head>
+<body>
+<header><div class="wrap">
+  <a class="mark" href="{BASE or '/'}">Front Range <span>Filings</span></a>
+  <div class="asof">Updated {updated}</div>
+</div></header>
+<div class="wrap legal">
+  <h1>{esc(title)}</h1>
+  {body}
+</div>
+<footer><div class="wrap">
+  <a href="{BASE}/privacy.html">Privacy</a> &nbsp;·&nbsp;
+  <a href="{BASE}/terms.html">Terms</a>
+</div></footer>
+</body></html>"""
+
+    privacy_body = f"""
+<p class="lede">This site publishes public business registration records and
+offers an optional email list. This page explains what happens to your data.
+Last updated {updated}.</p>
+
+<h2>What we collect</h2>
+<p>Only your email address, and only if you type it into a form here. We also
+record which segment you asked about, so we know which file to send you.</p>
+
+<h2>What we do with it</h2>
+<p>We send you the file you requested, and occasionally an email about this
+service. Nothing else.</p>
+
+<h2>What we never do</h2>
+<p>We do not sell, rent, trade, or share your email address. We do not add you
+to third-party marketing lists. We do not use it for advertising.</p>
+
+<h2>Who else touches it</h2>
+<p>Form submissions are handled by our form provider, and email delivery by our
+email provider. Each processes data on our behalf under its own privacy policy.
+The site itself is hosted by GitHub Pages, which records standard server logs.</p>
+
+<h2>The business records on this site</h2>
+<p>The business registration data published here comes from the Colorado
+Secretary of State's public open data portal. These are public records
+maintained by the State of Colorado, not by us. If you are a business owner and
+a record about your company is wrong, the correction must be made with the
+Secretary of State — we mirror the official data and cannot alter it. Once the
+state updates its record, our next daily pull reflects the change.</p>
+
+<h2>Your rights</h2>
+<p>Email {mail} to see what we hold about you, correct it, or have it deleted.
+We will action it within 30 days. Every email we send has a working unsubscribe
+link.</p>
+
+<h2>How long we keep it</h2>
+<p>While you are subscribed, and for 12 months after you unsubscribe for
+accounting records. Then it is deleted.</p>
+
+<h2>Cookies</h2>
+<p>This site sets no tracking cookies and runs no advertising trackers.</p>
+
+<h2>Changes</h2>
+<p>Updates are posted on this page with a new date at the top.</p>
+"""
+
+    terms_body = f"""
+<p class="lede">Plain terms for using this site and its email list.
+Last updated {updated}.</p>
+
+<h2>1. What this site is</h2>
+<p>A free directory of new business registrations in Colorado, compiled from
+the Colorado Secretary of State's public open data portal, with an optional
+email list that sends fuller versions of the same data.</p>
+
+<h2>2. Not affiliated with the State</h2>
+<p>{esc(SITE)} is an independent service. We are not affiliated with, endorsed
+by, or acting on behalf of the Colorado Secretary of State or any government
+body. Do not contact the State about this site.</p>
+
+<h2>3. What we do not promise</h2>
+<p>The data originates with the State of Colorado and we do not control it. We
+do not guarantee it is complete, current, or free of errors. Industry
+categories are assigned automatically from business names and will sometimes be
+wrong. We do not promise any commercial result from using this data. The
+service is provided "as is" and may be unavailable or delayed.</p>
+
+<h2>4. Your responsibilities</h2>
+<p>You are solely responsible for how you contact anyone whose details appear
+here. That includes compliance with the CAN-SPAM Act, the Telephone Consumer
+Protection Act, federal and state Do Not Call registries, Colorado telemarketing
+law, and any other rule that applies to your outreach. We publish public record
+data. We do not provide consent to contact anyone. You agree to indemnify us
+against claims arising from your outreach.</p>
+
+<h2>5. Acceptable use</h2>
+<p>Use this data for your own business. Do not republish or resell our compiled
+files as a competing data product, and do not use automated tools that place
+unreasonable load on this site. The underlying records are free from the State
+of Colorado if you want to build your own.</p>
+
+<h2>6. Removal requests</h2>
+<p>These are public records published by the State of Colorado. If you want a
+record changed, the change must be made at the source with the Secretary of
+State. Contact {mail} if you believe we have displayed something incorrectly.</p>
+
+<h2>7. Changes</h2>
+<p>We may update these terms. Continued use after an update means you accept
+it.</p>
+
+<h2>8. Governing law</h2>
+<p>These terms are governed by the laws of the United States and the state in
+which the operator resides.</p>
+"""
+
+    with open(os.path.join(OUT, "privacy.html"), "w", encoding="utf-8") as fh:
+        fh.write(legal_page("Privacy Policy", privacy_body))
+    with open(os.path.join(OUT, "terms.html"), "w", encoding="utf-8") as fh:
+        fh.write(legal_page("Terms of Use", terms_body))
+    print("wrote privacy.html + terms.html")
 
     # sitemap so search engines find all of them
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
