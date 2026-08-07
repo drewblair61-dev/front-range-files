@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://drewblair61-dev.github.io/front-range-files/sitemap.xml
