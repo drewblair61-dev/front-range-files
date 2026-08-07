@@ -368,8 +368,8 @@ def main():
         log.info("out-of-state principal address: %d", oos)
         log.info("categories: %s", dict(sorted(cats.items(),
                                                key=lambda x: -x[1])))
-        if inserted == 0:
-            ok, note = 0, "zero new rows — check the source"
+        if fetched == 0:
+            ok, note = 0, "zero rows from source — check the feed"
     except Exception as exc:
         ok, note = 0, str(exc)
         log.error("run failed: %s", exc)
