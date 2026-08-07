@@ -33,6 +33,20 @@ jobs:
       - name: Build digests
         run: python build_digest.py
 
+      - name: Build pages
+        env:
+          BASE_URL: "https://drewblair61-dev.github.io/front-range-files"
+          FORM_ACTION: "#"
+        run: python build_pages.py
+
+      - name: Publish pages
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add docs
+          git commit -m "Update pages" || echo "no changes"
+          git push
+
       - name: Upload digests
         uses: actions/upload-artifact@v4
         with:
