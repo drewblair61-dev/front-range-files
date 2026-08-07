@@ -25,6 +25,7 @@ OUT = os.environ.get("PAGES_DIR", "docs")
 SITE = os.environ.get("SITE_NAME", "Front Range Filings")
 BASE = os.environ.get("BASE_URL", "")          # e.g. https://yourdomain.com
 FORM = os.environ.get("FORM_ACTION", "#")      # your email form endpoint
+GSV = os.environ.get("GOOGLE_VERIFY", "")      # Search Console verification code
 WINDOW_DAYS = 30
 MIN_ROWS = 8          # below this, no page
 PREVIEW_ROWS = 10     # shown in full before the gate
@@ -142,6 +143,7 @@ def page(title, desc, h1, lede, stats, rows, hidden, county, category,
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
+{f'<meta name="google-site-verification" content="{GSV}">' if GSV else ''}
 {f'<link rel="canonical" href="{canonical}">' if canonical else ''}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
@@ -266,6 +268,7 @@ def main():
 <meta name="description" content="Browse new businesses registered in Colorado
 by county and industry. {total_all} filings in the last 30 days, pulled daily
 from official state records.">
+{f'<meta name="google-site-verification" content="{GSV}">' if GSV else ''}
 {f'<link rel="canonical" href="{BASE}/">' if BASE else ''}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
