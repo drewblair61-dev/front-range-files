@@ -121,20 +121,30 @@ def page(title, desc, h1, lede, stats, rows, hidden, county, category,
         items = "".join(f"<li><a href='{u}'>{esc(t)}</a></li>" for t, u in related)
         rel_html = f"<div class='rel'><h2>Other segments</h2><ul>{items}</ul></div>"
 
-    gate = ""
     if hidden > 0:
-        gate = f"""
+        headline = (f"{hidden} more {esc(category)} filings from the last "
+                    f"30 days")
+        pitch = ("The full list, with street addresses and registered agents, "
+                 "as a spreadsheet. Free, one email, no card.")
+    else:
+        # Small segments have nothing hidden, but a page with no way to
+        # subscribe is a dead end. Offer the ongoing feed instead.
+        headline = f"Get new {esc(category)} filings as they're registered"
+        pitch = ("This segment is small enough to show in full. Get next "
+                 "week's filings emailed to you as a spreadsheet, with "
+                 "street addresses and registered agents. Free, no card.")
+
+    gate = f"""
 <div class="gate">
-  <h2>{hidden} more {esc(category)} filings from the last 30 days</h2>
-  <p>The full list, with street addresses and registered agents, as a
-     spreadsheet. Free, one email, no card.</p>
+  <h2>{headline}</h2>
+  <p>{pitch}</p>
   <form class="f" action="{FORM}" method="post">
     <input type="hidden" name="segment" value="{esc(county)}|{esc(category)}">
     <input type="email" name="email" placeholder="you@company.com" required
            aria-label="Email address">
-    <button type="submit">Send me the full list</button>
+    <button type="submit">{'Send me the full list' if hidden else 'Email me new filings'}</button>
   </form>
-  <p class="fine">One email with the file attached. Unsubscribe in one click.</p>
+  <p class="fine">One email per send. Unsubscribe in one click.</p>
 </div>"""
 
     return f"""<!DOCTYPE html>
