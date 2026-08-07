@@ -244,6 +244,66 @@ def main():
         written += 1
         urls.append(fname)
 
+    # Homepage. Without one, the county pages are orphans and crawlers
+    # have no single entry point to follow.
+    total_all = conn.execute(
+        "SELECT COUNT(*) FROM entities WHERE formation_date >= ? "
+        "AND out_of_state = 0", (since,)).fetchone()[0]
+
+    blocks = []
+    for county in sorted(by_county):
+        links = "".join(f"<li><a href='{u}'>{esc(t)}</a></li>"
+                        for t, u in sorted(by_county[county]))
+        blocks.append(f"<div class='rel'><h2>{esc(county)} County</h2>"
+                      f"<ul>{links}</ul></div>")
+
+    home = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>New Colorado Business Registrations — Updated Daily | {esc(SITE)}</title>
+<meta name="description" content="Browse new businesses registered in Colorado
+by county and industry. {total_all} filings in the last 30 days, pulled daily
+from official state records.">
+{f'<link rel="canonical" href="{BASE}/">' if BASE else ''}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>{CSS}</style>
+</head>
+<body>
+<header><div class="wrap">
+  <a class="mark" href="{BASE or '/'}">Front Range <span>Filings</span></a>
+  <div class="asof">Updated {datetime.now(timezone.utc).strftime('%d %b %Y')}</div>
+</div></header>
+<div class="wrap">
+  <h1>New Colorado business registrations, by county and industry</h1>
+  <p class="lede">Every business registered with the Colorado Secretary of
+  State, sorted into the segments people actually sell to. Pulled daily from
+  the state's public open data portal.</p>
+  <div class="stats">
+    <div class="stat"><b>{total_all}</b><span>Filings, last 30 days</span></div>
+    <div class="stat"><b>{len(by_county)}</b><span>Counties covered</span></div>
+    <div class="stat"><b>{len(segments)}</b><span>Segments tracked</span></div>
+  </div>
+  {''.join(blocks)}
+  <div class="src">
+    Records come from the Colorado Secretary of State's public open data
+    portal. {esc(SITE)} is independent and not affiliated with or endorsed
+    by the State of Colorado.
+  </div>
+</div>
+<footer><div class="wrap">
+  Business registration data is public record. Any outreach you do using it
+  remains subject to CAN-SPAM, the TCPA, and Colorado telemarketing rules.
+</div></footer>
+</body></html>"""
+
+    with open(os.path.join(OUT, "index.html"), "w", encoding="utf-8") as fh:
+        fh.write(home)
+    urls.insert(0, "")
+    print("wrote index.html")
+
     # sitemap so search engines find all of them
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     entries = "".join(
