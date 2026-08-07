@@ -1,0 +1,41 @@
+name: collect-and-digest
+
+on:
+  schedule:
+    - cron: "0 11 * * *"
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install requests
+
+      - name: Restore database
+        uses: actions/cache@v4
+        with:
+          path: entities.db
+          key: entities-db-${{ github.run_id }}
+          restore-keys: entities-db-
+
+      - name: Collect
+        env:
+          SOCRATA_APP_TOKEN: ${{ secrets.SOCRATA_APP_TOKEN }}
+          LOOKBACK_DAYS: "7"
+        run: python collect.py
+
+      - name: Build digests
+        run: python build_digest.py
+
+      - name: Upload digests
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests
+          path: out/
+          retention-days: 14
