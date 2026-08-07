@@ -202,7 +202,8 @@ def main():
     print(f"{len(segments)} segments clear the {MIN_ROWS}-row minimum")
 
     # Build the link map first so pages can cross-reference each other.
-    paths = {(c, k): f"/{slug(c)}-county-{slug(k)}.html" for c, k, _ in segments}
+    paths = {(c, k): f"{BASE}/{slug(c)}-county-{slug(k)}.html"
+             for c, k, _ in segments}
     by_county = {}
     for (c, k), p in paths.items():
         by_county.setdefault(c, []).append((CATEGORY_LABEL.get(k, k), p))
@@ -228,7 +229,7 @@ def main():
         canonical = f"{BASE}/{fname}" if BASE else ""
 
         related = [(t, u) for t, u in by_county.get(county, [])
-                   if u != f"/{fname}"][:12]
+                   if not u.endswith(f"/{fname}")][:12]
 
         content = page(
             title=f"New {label} Businesses in {county} County, Colorado — Updated Daily",
